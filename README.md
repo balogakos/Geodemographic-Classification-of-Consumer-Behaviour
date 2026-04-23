@@ -31,8 +31,3 @@ Through this contribution, the study extends existing geodemographic approaches 
 2. **Run Pipeline**: Follow the numbered notebooks in the `notebooks/` directory to reproduce the classification.
 3. **Validate**: Use the `scripts/robustness_comparison.py` to evaluate clustering performance against other methods like PAM or FGWC.
 
-## References
-*   Dolega et al. (2021)
-*   Ntounis et al. (2023)
-*   Singh et al. (2024)
-*   *(See manuscript in /docs for full bibliography)*

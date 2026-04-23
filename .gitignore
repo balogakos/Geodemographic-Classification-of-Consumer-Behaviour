@@ -16,3 +16,7 @@ __pycache__/
 # R artifacts
 .Rhistory
 .RData
+
+# Document files
+*.doc
+*.docx
