@@ -1,0 +1,18 @@
+# Ignore large data files
+data/*
+!data/.gitkeep
+
+# Ignore results/figures if they are just for local preview (optional, but keep them if the user wants them in the repo)
+# results/figures/*
+
+# Jupyter Notebook artifacts
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# R artifacts
+.Rhistory
+.RData
