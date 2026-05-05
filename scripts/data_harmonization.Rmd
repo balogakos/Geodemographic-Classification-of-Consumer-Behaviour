@@ -1,115 +1,75 @@
 ---
-title: "UpdatedCensusHarmonised"
-author: "Cameron Ward"
+title: "LSOA Geodemographic Harmonization"
+author: "Cameron Ward / Akos Balog"
 date: '2023-06-27'
 output: html_document
+description: "Harmonizes LSOA (2011) to LSOA (2021) boundaries using ONS lookups and spatial PWC (Population Weighted Centroid) matching."
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-```{r}
 require(data.table)
 require(tidyverse)
-choose.files()
-LSOA2011 <- read.csv("C:\\Users\\sgabalog\\Documents\\P1\\LSOA_(2011)_to_LSOA_(2021)_to_Local_Authority_District_(2022)_Exact_Fit_Lookup_for_EW_(V3).csv", fileEncoding="UTF-8-BOM") %>%
-  select(1:7) %>%
-  rename(CHG21 = CHGIND)
-
-df <- LSOA2011
-
-df <- df %>%
-  mutate(LSOAXXCD = NA) %>%
-  mutate(LSOAXXCD = ifelse(CHG21 == "U", LSOA21CD, LSOAXXCD)) %>%
-  mutate(LSOAXXCD = ifelse(CHG21 == "M", LSOA21CD, LSOAXXCD)) %>%
-  mutate(LSOAXXCD = ifelse(CHG21 == "S", LSOA11CD, LSOAXXCD))
-```
-
-
-```{r}
-df |>
-  filter(df$CHG21 == 'U')
-```
-
-
-```{r}
-df |>
-  filter(df$CHG21 == 'M')
-```
-
-```{r}
-df |>
-  filter(df$CHG21 == 'S')
-```
-
-```{r}
-df |>
-  filter(is.na(LSOAXXCD))
-```
-
-
-```{r}
-df |>
-  filter(is.na(LSOAXXCD)) |>
-  select(CHG21) |>
-  group_by(CHG21) |>
-  summarise(n = n()) |>
-  print(n = Inf)
-```
-
-
-
-
-```{r}
-length(which(is.na(df$LSOAXXCD)))
-```
-
-```{r}
-install.packages("RANN")
-require(RANN)
-choose.files()
-
-pts11 <- read.csv("C:\\Users\\sgabalog\\Documents\\P1\\LSOA_Dec_2011_PWC_in_England_and_Wales_2022_1923591000694358693.csv") %>%
-  select(x, y, LSOA11CD) %>%
-  semi_join(df %>% filter(is.na(LSOAXXCD)), by = "LSOA11CD")
-
-pts21 <- read.csv("C:\\Users\\sgabalog\\Documents\\P1\\LLSOA_Dec_2021_PWC_for_England_and_Wales_2022_1028145039677403461.csv") %>%
-  select(x, y, LSOA21CD) %>%
-  semi_join(df %>% filter(is.na(LSOAXXCD)), by = "LSOA21CD")
-
-i <- nn2(data = pts11 %>% select(-LSOA11CD),
-         query = pts21 %>% select(-LSOA21CD),
-         k = 1)$nn.idx[,1]
-
-df <- left_join(df,
-                data.frame(LSOA21CD = pts21$LSOA21CD, nearest = pts11$LSOA11CD[i]),
-                by = "LSOA21CD") %>%
-  mutate(LSOAXXCD = ifelse(!is.na(nearest), nearest, LSOAXXCD)) %>%
-  select(-nearest)
-
-```
-
-
-```{r}
-df |>
-  filter(is.na(LSOAXXCD)) -> search
-
-df |>
-  filter(LSOA11CD %in% search$LSOA11CD |
-         LSOA21CD %in% search$LSOA21CD) -> found
-  
-found
-```
-
-
-```{r}
-length(unique(df$LSOAXXCD)) #34633 individual harmonised codes. 
-```
-
-```{r}
 require(stringr)
+require(sf)
+require(RANN)
+```
+
+## 1. Load Lookups
+Loading the exact fit lookups for England and Wales (v3).
+
+```{r}
+# Use relative paths from repo root
+lookup_path <- "../data/LSOA_(2011)_to_LSOA_(2021)_to_Local_Authority_District_(2022)_Exact_Fit_Lookup_for_EW_(V3).csv"
+
+if (file.exists(lookup_path)) {
+  LSOA2011 <- read.csv(lookup_path, fileEncoding="UTF-8-BOM") %>%
+    select(1:7) %>%
+    rename(CHG21 = CHGIND)
+  
+  df <- LSOA2011
+  
+  df <- df %>%
+    mutate(LSOAXXCD = NA) %>%
+    mutate(LSOAXXCD = ifelse(CHG21 == "U", LSOA21CD, LSOAXXCD)) %>%
+    mutate(LSOAXXCD = ifelse(CHG21 == "M", LSOA21CD, LSOAXXCD)) %>%
+    mutate(LSOAXXCD = ifelse(CHG21 == "S", LSOA11CD, LSOAXXCD))
+} else {
+  stop("Lookup file not found in ../data/")
+}
+```
+
+## 2. Spatial Matching (Nearest Neighbor)
+For LSOAs that cannot be matched exactly, we use Population Weighted Centroids (PWC) and nearest neighbor matching.
+
+```{r}
+pts11_path <- "../data/LSOA_Dec_2011_PWC_in_England_and_Wales_2022_1923591000694358693.csv"
+pts21_path <- "../data/LLSOA_Dec_2021_PWC_for_England_and_Wales_2022_1028145039677403461.csv"
+
+if (file.exists(pts11_path) && file.exists(pts21_path)) {
+  pts11 <- read.csv(pts11_path) %>%
+    select(x, y, LSOA11CD) %>%
+    semi_join(df %>% filter(is.na(LSOAXXCD)), by = "LSOA11CD")
+
+  pts21 <- read.csv(pts21_path) %>%
+    select(x, y, LSOA21CD) %>%
+    semi_join(df %>% filter(is.na(LSOAXXCD)), by = "LSOA21CD")
+
+  i <- nn2(data = pts11 %>% select(-LSOA11CD),
+           query = pts21 %>% select(-LSOA21CD),
+           k = 1)$nn.idx[,1]
+
+  df <- left_join(df,
+                  data.frame(LSOA21CD = pts21$LSOA21CD, nearest = pts11$LSOA11CD[i]),
+                  by = "LSOA21CD") %>%
+    mutate(LSOAXXCD = ifelse(!is.na(nearest), nearest, LSOAXXCD)) %>%
+    select(-nearest)
+}
+```
+
+## 3. Generate Harmonized IDs
+
+```{r}
 df |>
   select(LSOAXXCD) |>
   filter(!duplicated(LSOAXXCD)) -> gps
@@ -122,182 +82,30 @@ df |>
   select(-i) -> df
 ```
 
+## 4. Export Lookups
 
 ```{r}
-duplicated2011 <- df %>% group_by(LSOAXXCD) %>% summarise(count=n())
-duplicated2011 %>% arrange(desc(count))
-```
-## Higher-level geographies 
-
-Helpful to know which higher level geographies the harmonized LSOA fall within. 
-
-```{r}
-left_join(df |>
-    select(LSOAXXCD, LSOA11CD, LSOA21CD,CHG21, LAD22CD, LAD22NM),
-    read_csv("LSOA 2021 to BUA to LAD.csv",
-             progress = FALSE,
-             col_select = c(1, 3, 8, 9)) |>
-    rename(LSOA21CD = 1, BUA22CD = 2, RGN22CD = 3, RGN22NM = 4), by = "LSOA21CD") -> geography
-```
-#Write out the data 
-
-
-```{r}
-geography |>
-  write_csv("LSOAXXCD_full_lookup.csv")
-
-
-geography |>
-  select(LSOA11CD, LSOAXXCD) |>
-  unique(na.rm = TRUE) |>
-  arrange(LSOA11CD) |>
-  write_csv("LSOA11CD_to_LSOAXXCD.csv")
-
-geography |>
-  select(LSOA21CD, LSOAXXCD) |>
-  unique(na.rm = TRUE) |>
-  arrange(LSOA21CD) |>
-  write_csv("LSOA21CD_to_LSOAXXCD.csv")
+# Exports local files for use in clustering
+write_csv(df, "../data/LSOAXXCD_full_lookup.csv")
 ```
 
-
-
-## Boundary Files for the harmonised LSOA
-
-
-To map the harmonised-LSOAs, create a boundary file for them, based on the 2021 Census OA boundaries, load in those boundaries and append the LSOAXXCD codes.
+## 5. Boundary File Creation
+Aggregating 2021 LSOA census boundaries to harmonized units for mapping.
 
 ```{r}
-require(sf)
+# Path to GeoJSON/Shp
+boundary_path <- "../data/Lower_layer_Super_Output_Areas_(December_2021)_Boundaries_EW_BFC_(V10).shp"
 
-choose.files()
-map <- st_read("C://Users//sgcward//Documents//PhD//2nd paper- Risk indicator//Census Harmonised//New Updated//LSOA_(Dec_2021)_Boundaries_Generalised_Clipped_EW_(BGC).geojson") |>
-  left_join(df |> select(LSOAXXCD, LSOA21CD) |> unique(), by = "LSOA21CD")  #35672 fields
-```
-
-
-
-Now aggregate the 2021 LSOA census codes to the harmonised census codes (LSOAXXCD)
-
-```{r}
-aggregate(map |> select(LSOAXXCD), by = list(map$LSOAXXCD), FUN = length) |>
-  rename(LSOAXXCD = 1, nOA21 = 2) -> map
-
-map #34633
-```
-
-
-
-Then append the higher level geographies 
-
-```{r}
-map <- map %>%
-  left_join(geography, by = "LSOAXXCD")
-map #35796
-```
-
-
-
-```{r}
-map |>
-  st_write(dsn = "LSOAXXCD_Boundaries_Generalised_Clipped_EW2.geojson")
-```
-
-
-```{r}
-map |>
-  st_write(dsn = "LSOAXXCD_Boundaries_Generalised_Clipped_EW2.shp")
-```
-
-
-```{r}
-aggregated_map <- map %>%
-  group_by(LSOAXXCD) %>%
-  summarize(geometry = st_union(geometry)) %>%
-  ungroup()
-```
-
-```{r}
-invalid_geometries <- st_is_valid(map)
-
-# If there are invalid geometries, attempt to make them valid
-if (any(invalid_geometries)) {
-  map <- st_make_valid(map)
+if (file.exists(boundary_path)) {
+  map <- st_read(boundary_path) |>
+    left_join(df |> select(LSOAXXCD, LSOA21CD) |> unique(), by = "LSOA21CD")
+  
+  # Aggregate to LSOAXXCD
+  map_aggregated <- map %>%
+    group_by(LSOAXXCD) %>%
+    summarize(geometry = st_union(geometry)) %>%
+    ungroup()
+    
+  st_write(map_aggregated, "../data/harmonized_boundaries.geojson", delete_dsn = TRUE)
 }
-```
-
-
-
-
-
-
-
-
-
-
-```{r}
-map |>
-  st_write(dsn = "LSOAXXCD_Boundaries_Generalised_Clipped_EW2.geojson")
-```
-
-Can also save this as a shapefile for QGIS etc 
-
-```{r}
-map |>
-  st_write(dsn = "LSOAXXCD_Boundaries_Generalised_Clipped_EW2.shp")
-```
-
-#########################################
-
-
-
-```{r}
-geography |>
-  select(LSOAXXCD, BUA22CD,
-         LAD22CD, LAD22NM,
-         RGN22CD, RGN22NM, Popn) |>
-  unique() -> geography
-geography |>
-  group_by(LSOAXXCD) |>
-  summarise(Popn = sum(Popn), .groups = "keep") |>
-  left_join(geography |>
-    group_by(LSOAXXCD, BUA22CD) |>
-    summarise(Popn = sum(Popn), .groups = "keep") |>
-    group_by(LSOAXXCD) |>
-    arrange(LSOAXXCD, desc(Popn)) |>
-    select(-Popn) |>
-    slice(1) |>
-    ungroup(), by = "LSOAXXCD") |>
-  left_join(geography |>
-    group_by(LSOAXXCD, LAD22CD,LAD22NM) |>
-    summarise(Popn = sum(Popn), .groups = "keep") |>
-    group_by(LSOAXXCD) |>
-    arrange(LSOAXXCD, desc(Popn)) |>
-    select(-Popn) |>
-    slice(1) |>
-    ungroup(), by = "LSOAXXCD") |>
-  left_join(geography |>
-    group_by(LSOAXXCD, RGN22CD) |>
-    summarise(Popn = sum(Popn), .groups = "keep") |>
-    group_by(LSOAXXCD) |>
-    arrange(LSOAXXCD, desc(Popn)) |>
-    select(-Popn) |>
-    slice(1) |>
-    ungroup(), by = "LSOAXXCD") |>
-  left_join(geography |>
-    group_by(LSOAXXCD, RGN22NM) |>
-    summarise(Popn = sum(Popn), .groups = "keep") |>
-    group_by(LSOAXXCD) |>
-    arrange(LSOAXXCD, desc(Popn)) |>
-    select(-Popn) |>
-    slice(1) |>
-    ungroup(), by = "LSOAXXCD") |>
-  select(LSOAXXCD, Popn, BUA22CD, LAD22CD, LAD22NM,
-         RGN22CD, RGN22NM) -> geography
-geography |>
-  write_csv("LSOAXXCD_to_BUAXXNM_to_LADXXNM_RGNXXNM.csv")
-
-geography
-```
-
-##################################################
+```

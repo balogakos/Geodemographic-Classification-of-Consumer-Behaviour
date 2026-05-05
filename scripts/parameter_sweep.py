@@ -1,7 +1,16 @@
-import pandas as pd
-import numpy as np
+"""
+Geodemographic Classification of Consumer Behaviour
+Module: Comprehensive Parameter Sweep and Validation
+Author: Akos Balog
+Description: This script executes a multi-algorithm parameter sweep (K=3, 4, 5) 
+evaluating K-Means, PAM, FGWC, Hierarchical, GMM, and Spatially Constrained clustering.
+Validation is performed using Silhouette, Davies-Bouldin, and Calinski-Harabasz metrics.
+"""
+
 import os
 import sys
+import numpy as np
+import pandas as pd
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
@@ -57,6 +66,10 @@ class FGWC:
         return self
 
 def run_validation_sweep(data_path, feature_cols, coord_cols=None):
+    """
+    Runs a sweep across multiple clustering algorithms and K-values.
+    """
+    print(f"\n--- Loading Dataset: {data_path} ---")
     if not os.path.exists(data_path):
         print(f"ERROR: File {data_path} not found.")
         return
@@ -86,56 +99,52 @@ def run_validation_sweep(data_path, feature_cols, coord_cols=None):
             'Calinski_Harabasz': calinski_harabasz_score(X_scaled, labels)
         })
 
-    print("Starting Comprehensive Validation Sweep (K=3, 4, 5 for all methods)...")
+    print("Starting Comprehensive Validation Sweep (K=3, 4, 5)...")
 
     for k in [3, 4, 5]:
-        print(f"\n--- Testing K={k} ---")
+        print(f"Processing K={k}...")
         
         # 1. K-Means
-        print(f"Running K-Means...")
         km = KMeans(n_clusters=k, random_state=42, n_init=10).fit(X_scaled)
         evaluate('K-Means', km.labels_, k)
 
         # 2. PAM
         if KMedoids:
-            print(f"Running PAM...")
             pam = KMedoids(n_clusters=k, random_state=42, method='pam').fit(X_scaled)
             evaluate('PAM', pam.labels_, k)
         
         # 3. FGWC
         if coords_scaled is not None:
-            print(f"Running FGWC...")
             fgwc = FGWC(n_clusters=k, alpha=0.5).fit(X_scaled, coords_scaled)
             evaluate('FGWC', fgwc.labels_, k)
 
         # 4. Hierarchical
-        print(f"Running Hierarchical...")
         hier = AgglomerativeClustering(n_clusters=k).fit(X_scaled)
         evaluate('Hierarchical', hier.labels_, k)
 
         # 5. Model-based (GMM)
-        print(f"Running Model-based (GMM)...")
         gmm = GaussianMixture(n_components=k, random_state=42).fit(X_scaled)
         evaluate('GMM (Model-based)', gmm.predict(X_scaled), k)
 
         # 6. Spatially Constrained
         if connectivity is not None:
-            print(f"Running Spatially Constrained...")
             spat_const = AgglomerativeClustering(n_clusters=k, connectivity=connectivity).fit(X_scaled)
             evaluate('Spatially Constrained', spat_const.labels_, k)
 
-    # --- Final Output ---
-    print("\n" + "="*60)
-    print("COMPREHENSIVE VALIDATION SWEEP RESULTS (COPY-READY CSV)")
-    print("="*60)
+    # --- Final Results Table ---
+    print("\n" + "="*70)
+    print("                ALGORITHM VALIDATION SWEEP RESULTS")
+    print("="*70)
     results_df = pd.DataFrame(results).sort_values(['Method', 'K'])
-    print(results_df.to_csv(index=False))
+    print(results_df.round(4).to_string(index=False))
 
 if __name__ == "__main__":
-    FILE_PATH = r"C:\Users\sgabalog\Documents\P1\full_set.csv"
+    # Path configuration
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    FILE_PATH = os.path.join(BASE_DIR, "data", "full_set.csv")
     
     if os.path.exists(FILE_PATH):
-        # Auto-detect as in previous script
+        # Auto-detect features
         temp_df = pd.read_csv(FILE_PATH, nrows=5)
         cols = temp_df.columns.tolist()
         coord_candidates = ['lat', 'lon', 'latitude', 'longitude', 'x', 'y', 'X', 'Y', 'geometry']
@@ -145,10 +154,7 @@ if __name__ == "__main__":
                     and 'id' not in c.lower() 
                     and 'index' not in c.lower()]
         
-        print(f"File: {FILE_PATH}")
-        print(f"Detected Coordinates: {COORDINATES}")
-        print(f"Detected Features: {len(FEATURES)} features detected.")
-        
+        print(f"Detected {len(FEATURES)} features and {len(COORDINATES)} spatial coordinates.")
         run_validation_sweep(FILE_PATH, FEATURES, COORDINATES)
     else:
-        print(f"File {FILE_PATH} not found. Please check the path.")
+        print(f"File {FILE_PATH} not found. Please ensure 'data/full_set.csv' exists.")
