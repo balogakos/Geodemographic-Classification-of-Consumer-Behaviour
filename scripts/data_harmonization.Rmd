@@ -43,8 +43,8 @@ if (file.exists(lookup_path)) {
 For LSOAs that cannot be matched exactly, we use Population Weighted Centroids (PWC) and nearest neighbor matching.
 
 ```{r}
-pts11_path <- "../data/LSOA_Dec_2011_PWC_in_England_and_Wales_2022_1923591000694358693.csv"
-pts21_path <- "../data/LLSOA_Dec_2021_PWC_for_England_and_Wales_2022_1028145039677403461.csv"
+pts11_path <- "../data/lsoa_2011_population_weighted_centroids.csv"
+pts21_path <- "../data/lsoa_2021_population_weighted_centroids.csv"
 
 if (file.exists(pts11_path) && file.exists(pts21_path)) {
   pts11 <- read.csv(pts11_path) %>%
@@ -86,7 +86,7 @@ df |>
 
 ```{r}
 # Exports local files for use in clustering
-write_csv(df, "../data/LSOAXXCD_full_lookup.csv")
+write_csv(df, "../data/lsoa_harmonised_lookup.csv")
 ```
 
 ## 5. Boundary File Creation

@@ -51,7 +51,7 @@ def run_pipeline(postcode_shp_path: str):
     base_dir = Path(__file__).parent
 
     # Inputs
-    subclusters_csv = base_dir / "subclusters_done.csv"
+    subclusters_csv = base_dir / "lsoa_subcluster_assignments.csv"
     map_shp = base_dir / "map_shapefile.shp"
     postcode_shp = Path(postcode_shp_path)
 

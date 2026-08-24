@@ -74,7 +74,7 @@ install.packages(c("data.table", "tidyverse", "stringr", "sf", "RANN"))
 4. **Validate**: Use `scripts/robustness_comparison.py` or `scripts/parameter_sweep.py` to evaluate clustering performance against PAM, FGWC, GMM, and spatially constrained methods.
 
 ## Classification Outputs
-The final classification (`subclusters_done.csv`) maps each LSOA in England and Wales to one of 4 primary clusters and 9 subclusters. Spatial outputs are provided as shapefiles.
+The final classification (`lsoa_subcluster_assignments.csv`) maps each LSOA in England and Wales to one of 4 primary clusters and 9 subclusters. Spatial outputs are provided as shapefiles.
 
 ## Citation
 If you use this code or classification in your research, please cite:

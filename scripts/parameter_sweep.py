@@ -141,7 +141,7 @@ def run_validation_sweep(data_path, feature_cols, coord_cols=None):
 if __name__ == "__main__":
     # Path configuration
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    FILE_PATH = os.path.join(BASE_DIR, "data", "full_set.csv")
+    FILE_PATH = os.path.join(BASE_DIR, "data", "lsoa_synthetic_population.csv")
     
     if os.path.exists(FILE_PATH):
         # Auto-detect features
@@ -157,4 +157,4 @@ if __name__ == "__main__":
         print(f"Detected {len(FEATURES)} features and {len(COORDINATES)} spatial coordinates.")
         run_validation_sweep(FILE_PATH, FEATURES, COORDINATES)
     else:
-        print(f"File {FILE_PATH} not found. Please ensure 'data/full_set.csv' exists.")
+        print(f"File {FILE_PATH} not found. Please ensure 'data/lsoa_synthetic_population.csv' exists.")

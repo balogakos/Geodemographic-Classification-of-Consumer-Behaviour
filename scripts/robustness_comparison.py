@@ -173,10 +173,10 @@ def perform_clustering_comparison(data_path, feature_cols, coord_cols=None, n_cl
 if __name__ == "__main__":
     # Path configuration
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    DATA_PATH = os.path.join(BASE_DIR, "data", "full_set.csv")
+    DATA_PATH = os.path.join(BASE_DIR, "data", "lsoa_synthetic_population.csv")
     
     if not os.path.exists(DATA_PATH):
-        print(f"Data file not found at {DATA_PATH}. Please ensure 'data/full_set.csv' exists.")
+        print(f"Data file not found at {DATA_PATH}. Please ensure 'data/lsoa_synthetic_population.csv' exists.")
         sys.exit(1)
         
     # Auto-detect features
