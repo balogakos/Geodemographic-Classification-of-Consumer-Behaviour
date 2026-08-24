@@ -1,0 +1,5 @@
+classification_outputs/*.shp filter=lfs diff=lfs merge=lfs -text
+classification_outputs/*.shx filter=lfs diff=lfs merge=lfs -text
+classification_outputs/*.dbf filter=lfs diff=lfs merge=lfs -text
+classification_outputs/*.prj filter=lfs diff=lfs merge=lfs -text
+classification_outputs/*.cpg filter=lfs diff=lfs merge=lfs -text

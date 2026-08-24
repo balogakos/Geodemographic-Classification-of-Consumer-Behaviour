@@ -17,8 +17,13 @@ docs/
 subclusters_done.csv
 postcode_subcluster_map.csv
 
-# Allow tracking output CSVs inside the dedicated outputs folder
+# Allow tracking output CSVs and shapefiles inside the dedicated outputs folder
 !classification_outputs/*.csv
+!classification_outputs/*.shp
+!classification_outputs/*.shx
+!classification_outputs/*.dbf
+!classification_outputs/*.prj
+!classification_outputs/*.cpg
 
 # Jupyter Notebook artifacts
 .ipynb_checkpoints
