@@ -39,7 +39,7 @@ The following datasets are required to reproduce the geodemographic classificati
 ---
 
 ### 5. Rural Urban Classification (RUC) 2011
-- **File(s):** Used to derive urbanity category per LSOA
+- **File(s):** `rural_urban_classification_2011_lsoa.csv`
 - **Source:** [ONS Open Geography Portal: Rural Urban Classification 2011 of LSOAs in EW](https://geoportal.statistics.gov.uk/datasets/ons::rural-urban-classification-2011-of-lsoas-in-ew/about)
 - **Note:** Applies 2011 LSOA boundaries; requires harmonisation with 2021 boundaries before use
 - **Licence:** Open Government Licence v3.0
@@ -72,6 +72,6 @@ The following datasets are required to reproduce the geodemographic classificati
 | `accessibility_indicators_gbai.csv`, `supermarket_accessibility_lsoa.csv` | `02_data_synthesis.ipynb` |
 | `Lower_layer_Super_Output_Areas_*` | `02_data_synthesis.ipynb`, `scripts/data_harmonization.Rmd` |
 | `LSOA_(2011)_to_LSOA_(2021)_*` | `scripts/data_harmonization.Rmd` |
-| Rural Urban Classification 2011 | `01_variable_selection.ipynb`, `02_data_synthesis.ipynb` |
+| `rural_urban_classification_2011_lsoa.csv` | `01_variable_selection.ipynb`, `02_data_synthesis.ipynb` |
 | `lsoa_cluster_assignments.csv` | Output of `03_clustering_analysis.ipynb` |
 | `lsoa_subcluster_assignments.csv` | Output of `03_clustering_analysis.ipynb` |
