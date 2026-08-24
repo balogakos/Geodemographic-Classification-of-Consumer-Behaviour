@@ -1,9 +1,16 @@
-# Ignore large data files
+# Ignore large data files (download instructions in data/README.md)
 data/*
+!data/README.md
 !data/.gitkeep
 
-# Ignore results/figures if they are just for local preview (optional, but keep them if the user wants them in the repo)
-# results/figures/*
+# Root-level shapefiles and large CSVs (pipeline outputs - not for version control)
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+subclusters_done.csv
+postcode_subcluster_map.csv
 
 # Jupyter Notebook artifacts
 .ipynb_checkpoints
@@ -17,6 +24,6 @@ __pycache__/
 .Rhistory
 .RData
 
-# Document files
-*.doc
-*.docx
+# OS
+.DS_Store
+Thumbs.db

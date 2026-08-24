@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use this repository in your research, please cite the associated paper."
+title: "Open Geodemographic Classification of Consumer Behaviour (England & Wales)"
+type: software
+authors:
+  - family-names: Balog
+    given-names: Ákos
+    orcid: "https://orcid.org/0009-0009-3461-6540"
+  - family-names: Dolega
+    given-names: Les
+  - family-names: Mahabir
+    given-names: Ron
+  - family-names: Ballantyne
+    given-names: Patrick
+  - family-names: Williamson
+    given-names: Paul
+repository-code: "https://github.com/balogakos/Geodemographic-Classification-of-Consumer-Behaviour"
+license: MIT
+version: "1.0.0"
+date-released: "2026-08-20"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Balog
+      given-names: Ákos
+    - family-names: Dolega
+      given-names: Les
+    - family-names: Mahabir
+      given-names: Ron
+    - family-names: Ballantyne
+      given-names: Patrick
+    - family-names: Williamson
+      given-names: Paul
+  title: "Developing an open, national-level, small-area geodemographic classification of consumer behaviour"
+  journal: "International Journal of Retail & Distribution Management"
+  year: 2026
+  month: 8
+  pages: "1-16"
+  doi: "10.1108/IJRDM-06-2025-0436"
+  url: "https://doi.org/10.1108/IJRDM-06-2025-0436"
