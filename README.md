@@ -93,5 +93,3 @@ If you use this code or classification in your research, please cite:
 
 ## Licence
 This software is released under the [MIT Licence](LICENSE).
-
-Source data from the Office for National Statistics (ONS) is licensed under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
