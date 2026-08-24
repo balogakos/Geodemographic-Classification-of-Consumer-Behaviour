@@ -3,6 +3,10 @@ data/*
 !data/README.md
 !data/.gitkeep
 
+# Manuscript and working documents
+docs/
+
+
 # Root-level shapefiles and large CSVs (pipeline outputs - not for version control)
 *.shp
 *.shx
