@@ -16,6 +16,9 @@ docs/
 subclusters_done.csv
 postcode_subcluster_map.csv
 
+# Allow tracking output formats inside the dedicated outputs folder
+!classification_outputs/*
+
 # Jupyter Notebook artifacts
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
