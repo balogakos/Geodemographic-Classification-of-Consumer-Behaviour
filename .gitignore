@@ -13,11 +13,12 @@ docs/
 *.dbf
 *.prj
 *.cpg
+*.gpkg
 subclusters_done.csv
 postcode_subcluster_map.csv
 
-# Allow tracking output formats inside the dedicated outputs folder
-!classification_outputs/*
+# Allow tracking output CSVs inside the dedicated outputs folder
+!classification_outputs/*.csv
 
 # Jupyter Notebook artifacts
 .ipynb_checkpoints
